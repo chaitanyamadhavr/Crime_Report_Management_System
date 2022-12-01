@@ -1,0 +1,96 @@
+
+
+----------JOIN QUERIES----------
+
+--------- REGULAR JOINS --------
+--1. The following SQL statement (INNER JOIN) selects all case_id with officer names:--
+SELECT crime_fir.case_id, action_report.officer_name
+FROM crime_fir
+INNER JOIN action_report ON crime_fir.case_id = action_report.action_caseid;
+
+--2. select all fir along with the police head quaters details.---
+select * from crime_fir INNER JOIN police_quaters 
+ON crime_fir.fir_city=police_quaters.q_city;
+
+--3. select all fir along with crime details --
+select * from crime_fir INNER JOIN crime_details 
+ON crime_fir.case_id=crime_details.criminal_id;
+
+
+--Co-Related Queries--
+--4.The following SQL statement (SELF JOIN) matches criminal who have same criminal_type:--
+SELECT A.criminal_name AS criminal_name1, B.criminal_name AS criminal_name2, A.criminal_type
+FROM crime_details A, crime_details B
+WHERE A.criminal_id <> B.criminal_id
+AND A.criminal_type = B.criminal_type
+ORDER BY A.criminal_type;
+
+
+--Nested Queries--
+--5. select all the fir and caseid which has been reported to police head quaters--
+select * from crime_fir 
+where crime_fir.fir_city in (select q_city from police_quaters);
+
+
+
+
+--Aggregate Functions--
+ select max(user_age) from user_details;
+
+ select min(user_age) from user_details;
+
+ select avg(user_age) from user_details;
+ 
+ select count(*) from crime_details;
+
+
+--SET OPERATIONS--
+
+--1. Updates the action_report (action_caseid = 453) with a new action_evidence and a new action_status.---
+UPDATE action_report
+SET action_evidence = 'NOT FOUND', action_status= 'not completed'
+WHERE action_caseid = 453;
+
+--2.Updates the police_quaters (q_officerid = 6464) with a new q_city.---
+
+UPDATE police_quaters
+SET q_city = 'Bengaluru'
+WHERE q_officerid = 6464;
+
+--3. Updates the crime_fir (case_id = 111) with a new fir_time and new fir_date.--- 
+UPDATE crime_fir
+SET fir_time = '00:00:00', fir_date= '1948-08-21'
+WHERE case_id = 111;
+
+--4. Updates the crime_details (criminal_id = 11) with a new criminal_type.--- 
+UPDATE crime_details
+SET criminal_type = 'SERIAL KILLER'
+WHERE criminal_id = 11;
+
+----------VIEWS----------
+create view Delhi_Criminals AS 
+select criminal_name,criminal_type
+from crime_details
+where criminal_id =16;
+
+select * from Delhi_Criminals;
+
+create view show_dehli_Criminals AS 
+select criminal_name,criminal_id,criminal_type
+from crime_details
+where crime_location = 'DELHI';
+
+select * from Delhi_Criminals;
+
+----- Triggers ------
+delimiter $$
+CREATE or replace TRIGGER Check_age  
+BEFORE INSERT ON user_details 
+FOR EACH ROW
+BEGIN
+IF (New.user_age < 12)
+ THEN 
+ SIGNAL SQLSTATE '45000'SET MESSAGE_TEXT = 'ERROR: AGE MUST BE ATLEAST 25 YEARS!';
+END IF;
+END; $$
+delimiter; 
